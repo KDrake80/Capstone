@@ -17,7 +17,7 @@
     -fx-label-padding: 10;
 }
 .mainpane {
-    -fx-padding: 0, 15, 15, 15;
+    -fx-padding: 15, 15, 15, 15;
     -fx-border-color: black;
     -fx-border-width: 10;
 }
@@ -29,4 +29,8 @@
 .minipane {
     -fx-border-width: 2;
     -fx-padding: 10;
+}
+.viewpane {
+    -fx-border-color: black;
+    -fx-padding: 20, 0, 0, 0;
 }
