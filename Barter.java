@@ -1,16 +1,6 @@
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.EOFException;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.List;
-
+import java.io.*;
+import java.util.*;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -23,7 +13,6 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Pagination;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
@@ -31,10 +20,12 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
@@ -43,26 +34,19 @@ public class Barter extends Application {
 	List<Account> accounts = new ArrayList<>();
 	Stage stage;
 	public void start(Stage stage) {
-		try {
-			getAccounts();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
+		getAccounts();
 		LogInPane logIn = new LogInPane();
-		Scene logInScene = new Scene(logIn, 350, 250);
+		Scene logInScene = new Scene(logIn, 360, 260);
+		logInScene.getStylesheets().add("barter.css");
 		stage.setTitle("Barter");
 		stage.setScene(logInScene);
 		stage.show();
-		for (Account a: accounts) {
-			System.out.println(a.getAccountName() + " " + a.getAccountPass());
-		}
 		AccountPane accountPane = new AccountPane();
 		CreateAccountPane createPane = new CreateAccountPane();
 		EditAccount editPane = new EditAccount();
 		ViewPane viewPane = new ViewPane();
-		System.out.println(accounts.size());
-		Scene accountScene = new Scene(accountPane, 650, 450);
+		Scene accountScene = new Scene(accountPane, 750, 500);
+		accountScene.getStylesheets().add("barter.css");
 		logIn.btSubmit.setOnAction(e -> {
 			String accountName = logIn.tfName.getText();
 			String accountPass = logIn.tfPass.getText();
@@ -82,11 +66,15 @@ public class Barter extends Application {
 				}
 			}
 		});
-		logIn.btCreate.setOnAction(e -> stage.setScene(new Scene(createPane, 350, 250)));
+		logIn.btCreate.setOnAction(e -> {
+			stage.setScene(new Scene(createPane, 350, 250));
+			stage.getScene().getStylesheets().add("barter.css");
+		});
 		logIn.btCancel.setOnAction(e -> System.exit(0));
 		logIn.miHelp.setOnAction(e -> {
 			HelpPane helpPane = new HelpPane();
 			Scene help = new Scene(helpPane, 550, 400);
+			help.getStylesheets().add("barter.css");
 			stage.setScene(help);
 			helpPane.btBack.setOnAction(s -> stage.setScene(logInScene));
 		});
@@ -98,8 +86,11 @@ public class Barter extends Application {
 		});
 		createPane.btCancel.setOnAction(e -> System.exit(1));
 		accountPane.btAdd.setOnAction(e -> {
+			String price = accountPane.tfPrice.getText();
+			price = price.replace(",", "");
+			double newPrice = Double.parseDouble(price);
 			mainAccount.addItem(accountPane.tfName.getText(),
-					accountPane.tfDescription.getText(), Double.parseDouble(accountPane.tfPrice.getText()));
+					accountPane.tfDescription.getText(), newPrice);
 			accountPane.tbItems.getTabs().clear();
 			accountPane.setAccount(mainAccount);
 			accountPane.tfName.clear();
@@ -126,11 +117,16 @@ public class Barter extends Application {
 			BorderPane bp = new BorderPane();
 			VBox vbAll = new VBox(10);
 			Scene delete = new Scene(bp, 350, 250);
+			delete.getStylesheets().add("barter.css");
 			Label lbSure = new Label("Delete Account?");
 			Button btYes = new Button("Yes");
 			Button btCancel = new Button("Cancel");
 			HBox hb = new HBox(15);
-
+			lbSure.getStyleClass().add("plainlabel");
+			btYes.getStyleClass().add("plainbutton");
+			btCancel.getStyleClass().add("plainbutton");
+			vbAll.getStyleClass().add("infopane");
+			bp.getStyleClass().add("mainpane");
 			hb.setAlignment(Pos.CENTER);
 			vbAll.setAlignment(Pos.CENTER);
 			hb.getChildren().addAll(btYes, btCancel);
@@ -149,11 +145,14 @@ public class Barter extends Application {
 		accountPane.miHelp.setOnAction(e -> {
 			HelpPane help = new HelpPane();
 			stage.setScene(new Scene(help, 550, 400));
+			stage.getScene().getStylesheets().add("barter.css");
+			help.getStyleClass().add("mainpane");
 			help.btBack.setOnAction(b -> stage.setScene(accountScene));	
 		});
-		
+
 		accountPane.miEdit.setOnAction(e -> {
 			Scene editScene = new Scene(editPane, 550, 450);
+			editScene.getStylesheets().add("barter.css");
 			stage.setScene(editScene);
 		});
 		editPane.btCancel.setOnAction(e -> {
@@ -162,12 +161,16 @@ public class Barter extends Application {
 			stage.setScene(accountScene);
 		});
 		editPane.btDeposit.setOnAction(e -> {
-			double deposit = Double.parseDouble(editPane.tfBalance.getText());
+			String d = editPane.tfBalance.getText();
+			d = d.replace(",", "");
+			double deposit = Double.parseDouble(d);
 			mainAccount.deposit(deposit);
 			editPane.tfBalance.clear();
 		});
 		editPane.btWithdraw.setOnAction(e -> {
-			double withdraw = Double.parseDouble(editPane.tfBalance.getText());
+			String w = editPane.tfBalance.getText();
+			w = w.replace(",", "");
+			double withdraw = Double.parseDouble(w);
 			mainAccount.withdraw(withdraw);
 			editPane.tfBalance.clear();
 		});
@@ -185,7 +188,8 @@ public class Barter extends Application {
 		});
 		accountPane.miView.setOnAction(e -> {
 			viewPane.setPages();
-			Scene viewScene = new Scene(viewPane, 450, 350);
+			Scene viewScene = new Scene(viewPane, 550, 450);
+			viewScene.getStylesheets().add("barter.css");
 			viewPane.setInfo();
 			stage.setScene(viewScene);
 		});
@@ -202,6 +206,9 @@ public class Barter extends Application {
 				BorderPane bp = new BorderPane();
 				bp.setCenter(new Label("Insufficient Funds"));
 				secondStage.setScene(new Scene(bp));
+				secondStage.getScene().getStylesheets().add("barter.css");
+				bp.getStyleClass().add("mainpane");
+				bp.getCenter().getStyleClass().add("largelabel");
 				secondStage.show();
 			}
 			else {
@@ -231,15 +238,14 @@ public class Barter extends Application {
 			for (int i = 0; i < accounts.size(); i++) {
 				output.writeObject(accounts.get(i));
 			}
-			System.out.println("Transferred: " + accounts.size());
 			output.close();
 		}
 		catch (IOException l) {
 			l.printStackTrace();
-			
+
 		}
 	}
-	public void getAccounts() throws IOException {
+	public void getAccounts() {
 		accounts = new ArrayList<Account>();
 		try {
 			ObjectInputStream input = new ObjectInputStream(
@@ -259,7 +265,6 @@ public class Barter extends Application {
 		catch (Exception ex) {
 			ex.printStackTrace();
 		}
-		System.out.println("Received: " + accounts.size());
 	}
 	public static void main(String[] args) {
 		launch(args);
@@ -281,9 +286,21 @@ public class Barter extends Application {
 		HBox hbButtons = new HBox(10);
 
 		public LogInPane() {
+			setTop(menu);
+			getStyleClass().add("mainpane");
+			vbLabels.getStyleClass().add("minorpane");
+			vbText.getStyleClass().add("minorpane");
+			btSubmit.getStyleClass().add("plainbutton");
+			btCreate.getStyleClass().add("plainbutton");
+			btCancel.getStyleClass().add("plainbutton");
+			tfName.getStyleClass().add("plaintextfield");
+			tfPass.getStyleClass().add("plaintextfield");
+			menu.getStyleClass().add("menubar");
+			lblName.getStyleClass().add("plainlabel");
+			lblPass.getStyleClass().add("plainlabel");
+			hbPanes.getStyleClass().add("infopane");
 			menu.getMenus().add(mHelp);
 			mHelp.getItems().add(miHelp);
-			setTop(menu);
 			vbLabels.setAlignment(Pos.CENTER);
 			vbLabels.getChildren().addAll(lblName, lblPass);
 			vbText.setAlignment(Pos.CENTER);
@@ -292,7 +309,7 @@ public class Barter extends Application {
 			hbPanes.setAlignment(Pos.CENTER);
 			hbButtons.getChildren().addAll(btSubmit, btCreate, btCancel);
 			hbButtons.setAlignment(Pos.CENTER);
-			setCenter(hbPanes);
+			setRight(hbPanes);
 			setBottom(hbButtons);
 			setPadding(new Insets(5, 10, 10, 10));
 		}
@@ -309,8 +326,8 @@ public class Barter extends Application {
 		MenuItem miHelp = new MenuItem("Help");
 		TabPane tbItems = new TabPane();
 		VBox vbItems = new VBox(25);
-		HBox hbLabels = new HBox(90);
-		HBox hbText = new HBox(10);
+		HBox hbLabels = new HBox(100);
+		HBox hbText = new HBox(30);
 		HBox hbButtons = new HBox(35);
 		Button btAdd = new Button("Add Item");
 		Button btRemove = new Button("Remove");
@@ -327,7 +344,23 @@ public class Barter extends Application {
 		Label lbItemPrice = new Label("Item Price");
 
 		public AccountPane() {
-			setPadding(new Insets(5, 15, 15, 15));
+			btRemove.getStyleClass().add("plainbutton");
+			btAdd.getStyleClass().add("plainbutton");
+			tfName.getStyleClass().add("plaintextfield");
+			tfDescription.getStyleClass().add("plaintextfield");
+			tfPrice.getStyleClass().add("plaintextfield");
+			menuBar.getStyleClass().add("menubar");
+			vbInfo.getStyleClass().add("infopane");
+			tbItems.getStyleClass().add("tabpane");
+			getStyleClass().add("mainpane");
+			lbName.getStyleClass().add("largelabel");
+			lbLocation.getStyleClass().add("plainlabel");
+			lbBalance.getStyleClass().add("plainlabel");
+			lbItemCount.getStyleClass().add("plainlabel");
+			lbItemName.getStyleClass().add("plainlabel");
+			lbItemDescription.getStyleClass().add("plainlabel");
+			lbItemPrice.getStyleClass().add("plainlabel");
+			vbItems.getStyleClass().add("infopane");
 			setTop(menuBar);
 			menuBar.getMenus().addAll(menuAccount, menuBuy, menuHelp);
 			menuAccount.getItems().addAll(miEdit, miDelete, miSave);
@@ -356,7 +389,7 @@ public class Barter extends Application {
 			}
 			lbName.setText(a.getAccountName());
 			lbLocation.setText(a.getLocation());
-			lbBalance.setText("Balance: $" + a.getBalance() + "0");
+			lbBalance.setText("Balance\n$" + a.getBalance() + "0");
 			lbItemCount.setText("Items: " + a.getItemCount());
 		}
 	}
@@ -373,6 +406,14 @@ public class Barter extends Application {
 		HBox hbButtons = new HBox(10);
 
 		public CreateAccountPane() {
+			getStyleClass().add("mainpane");
+			lblName.getStyleClass().add("plainlabel");
+			lblPass.getStyleClass().add("plainlabel");
+			tfName.getStyleClass().add("plaintextfield");
+			tfPass.getStyleClass().add("plaintextfield");
+			btSubmit.getStyleClass().add("plainbutton");
+			btCancel.getStyleClass().add("plainbutton");
+			hbPanes.getStyleClass().add("infopane");
 			vbLabels.setAlignment(Pos.CENTER);
 			vbLabels.getChildren().addAll(lblName, lblPass);
 			vbText.setAlignment(Pos.CENTER);
@@ -397,6 +438,10 @@ public class Barter extends Application {
 			super(i.getItemName());
 			itemName.setText(i.getItemName());
 			itemName.setEditable(false);
+			itemName.getStyleClass().add("plaintextfield");
+			description.getStyleClass().add("plaintextfield");
+			itemPrice.getStyleClass().add("plaintextfield");
+			vb.getStyleClass().add("infopane");
 			description.setText(i.getDescription());
 			description.setPrefHeight(80);
 			description.setPrefWidth(100);
@@ -420,7 +465,7 @@ public class Barter extends Application {
 		Label lbPass = new Label("Password");
 		Label lbBalance = new Label("Balance");
 		Label lbLocation = new Label("Location");
-		Label lbSave = new Label("Save Changes");
+		Label lbSave = new Label("Make sure to \nlog out to \nsave changes");
 		TextField tfName = new TextField();
 		TextField tfPass = new TextField();
 		TextField tfBalance = new TextField();
@@ -433,11 +478,31 @@ public class Barter extends Application {
 		Button btCancel = new Button("Back");
 
 		public EditAccount() {
+			getStyleClass().add("mainpane");
+			lbEdit.getStyleClass().add("largelabel");
+			lbName.getStyleClass().add("plainlabel");
+			lbPass.getStyleClass().add("plainlabel");
+			lbBalance.getStyleClass().add("plainlabel");
+			lbLocation.getStyleClass().add("plainlabel");
+			lbSave.getStyleClass().add("plainlabel");
+			tfName.getStyleClass().add("plaintextfield");
+			tfPass.getStyleClass().add("plaintextfield");
+			tfBalance.getStyleClass().add("plaintextfield");
+			tfLocation.getStyleClass().add("plaintextfield");
+			btEditName.getStyleClass().add("plainbutton");
+			btEditPass.getStyleClass().add("plainbutton");
+			btDeposit.getStyleClass().add("plainbutton");
+			btWithdraw.getStyleClass().add("plainbutton");
+			btEditLocation.getStyleClass().add("plainbutton");
+			btCancel.getStyleClass().add("plainbutton");
+			vbName.getStyleClass().add("infopane");
+			vbBalance.getStyleClass().add("infopane");
 			setAlignment(lbEdit, Pos.CENTER);
 			setTop(lbEdit);
 			hb.setAlignment(Pos.CENTER);
 			hb.getChildren().addAll(vbName, vbSave, vbBalance);
 			vbName.setAlignment(Pos.CENTER);
+			lbSave.setTextAlignment(TextAlignment.CENTER);
 			vbName.getChildren().addAll(lbName, tfName, btEditName, lbPass, tfPass, btEditPass);
 			vbBalance.setAlignment(Pos.CENTER);
 			HBox hbMoney = new HBox(15);
@@ -461,14 +526,22 @@ public class Barter extends Application {
 		Button btCancel = new Button("Cancel");
 		Pagination pag = new Pagination(accounts.size() - 1, 0);
 		TableView<Item> tbvAccounts = new TableView<>();
-		
+
 		public ViewPane() {
+			getStyleClass().add("mainpane");
+			lbMName.getStyleClass().add("largelabel");
+			lbMItemCount.getStyleClass().add("plainlabel");
+			lbMBalance.getStyleClass().add("plainlabel");
+			vbMain.getStyleClass().add("infopane");
+			tbvAccounts.getStyleClass().add("tableview");
+			setPadding(new Insets(15));
 			hbButtons.getChildren().addAll(btBuy, btCancel);
 			hbButtons.setAlignment(Pos.TOP_CENTER);
 			setLeft(vbMain);
 			setCenter(pag);
 			vbMain.getChildren().addAll(lbMName, lbMItemCount, lbMBalance);
-			vbMain.setAlignment(Pos.CENTER);
+			vbMain.setAlignment(Pos.TOP_CENTER);
+			vbMain.setPadding(new Insets(15));
 		}
 		public void setInfo() {
 			lbMName.setText(mainAccount.getAccountName());
@@ -479,14 +552,18 @@ public class Barter extends Application {
 			pag.setPageFactory(new Callback<Integer, Node>() {
 				public Node call(Integer pageIndex) {
 					VBox vbAccount = new VBox(10);
+					vbAccount.getStyleClass().add("infopane");
 					Label lbName = new Label(accounts.get(pageIndex).getAccountName());
+					lbName.getStyleClass().add("largelabel");
 					Account a = accounts.get(pageIndex);
 					Label lbItemCount = new Label("Items: " + accounts.get(pageIndex).getItemCount());
+					lbItemCount.getStyleClass().add("plainlabel");
 					vbAccount.getChildren().addAll(lbName, lbItemCount, tbvAccounts, hbButtons);
 					vbAccount.setAlignment(Pos.TOP_CENTER);
 					Account current = accounts.get(pageIndex);
 					ObservableList<Item> itemList = FXCollections.observableArrayList(current.getItems());
-					tbvAccounts.setMaxSize(302, 300);
+					tbvAccounts.getColumns().clear();
+					tbvAccounts.setMaxSize(439, 320);
 					tbvAccounts.setItems(itemList);
 					TableColumn nameCol = new TableColumn("Item Name");
 					nameCol.setMinWidth(100);
@@ -498,12 +575,22 @@ public class Barter extends Application {
 					descriptionCol.setCellValueFactory(
 							new PropertyValueFactory<Item, String>("description"));
 					TextArea taDescription = new TextArea(descriptionCol.getText());
-					
+
 					TableColumn priceCol = new TableColumn("Item Price");
 					priceCol.setMinWidth(100);
 					priceCol.setCellValueFactory(
 							new PropertyValueFactory<Item, Double>("itemPrice"));
 					tbvAccounts.getColumns().addAll(nameCol, descriptionCol, priceCol);
+					tbvAccounts.setOnMouseClicked(e -> {
+						Item i = current.getItem(tbvAccounts.getSelectionModel().getSelectedIndex());
+						ViewItemPane view = new ViewItemPane();
+						view.setItem(i);
+						Stage secondStage = new Stage();
+						secondStage.setScene(new Scene(view, 300, 250));
+						secondStage.getScene().getStylesheets().add("barter.css");
+						secondStage.show();
+						view.btBack.setOnAction(x -> secondStage.close());
+					});
 					return vbAccount;
 				}
 			});
@@ -521,18 +608,21 @@ public class Barter extends Application {
 		Tab logOutTab = new Tab("Log Out");
 
 		public HelpPane() {
+			getStyleClass().add("mainpane");
 			setCenter(tabs);
-			tabs.getTabs().addAll(logInTab, createTab, editTab, itemTab, deleteTab, logOutTab);
+			tabs.getTabs().addAll(logInTab, createTab, editTab, itemTab, buyTab, deleteTab, logOutTab);
 			TextArea taLogIn = new TextArea("\t\t\t How to Log In\n\nStep 1: Run the Program\n\nStep 2: Enter Account Name/Account Password"
 					+ "\n\nStep 3: Click Submit\n\n\n`````````````````````````````````````````````````````````````````````````\n\n"
 					+ "[> If you have not created an account yet, Click the Create Account button\n\n[> Click Cancel button to exit");
 			taLogIn.setEditable(false);
 			taLogIn.setWrapText(true);
+			taLogIn.getStyleClass().add("plaintextfield");
 			logInTab.setContent(taLogIn);
 			TextArea taCreate = new TextArea("\t\t\t How to Create an Account\n\nStep 1: Run Program\n\nStep 2: Click Create Account button"
 					+ "\n\nStep 3: Enter Desired Account Name/Account Password\n\nStep 4: Click Submit button");
 			taCreate.setEditable(false);
 			taCreate.setWrapText(true);
+			taCreate.getStyleClass().add("plaintextfield");
 			createTab.setContent(taCreate);
 			TextArea taEdit = new TextArea("\t\t\t How to Edit Account\n\nStep 1: Log in\n\nStep 2: Click Account on the top menu bar\n\n"
 					+ "Step 3: Click Edit Account\n\nStep 4: Choose which data you want to change\n\nStep 5: Click Edit Button\n\n"
@@ -543,6 +633,7 @@ public class Barter extends Application {
 			taEdit.setEditable(false);
 			taEdit.setWrapText(true);
 			editTab.setContent(taEdit);
+			taEdit.getStyleClass().add("plaintextfield");
 			TextArea taItem = new TextArea("\t\t\t How to Add Items\n\nStep 1: Log In to Account\n\nStep 2: Enter Item information "
 					+ "[Item Name, Description, and Price]\n\nStep 3: Click the Add Button\n\n\n\t\t\t How to Remove Items\n\nStep 1: "
 					+ "Log In to Account\n\nStep 2: Select Whatever Item you want removed in your tab list on the account screen.\n\n"
@@ -550,15 +641,18 @@ public class Barter extends Application {
 					+ "[> Make Sure to SAVE by clicking the Log Out menu button");
 			taItem.setEditable(false);
 			taItem.setWrapText(true);
+			taItem.getStyleClass().add("plaintextfield");
 			itemTab.setContent(taItem);
 			TextArea taBuy = new TextArea("\t\t\t How to View Accounts/Buy Items\n\nStep 1: Log In to Account\n\nStep 2: Click View"
 					+ " Accounts menu item, then click View\n\nStep 3: Choose which account to buy from, by selecting which page to look at"
-					+ "\n\nStep 4: Once you have seen an item you want to buy, click on it with the mouse and press the buy button\n\n\n"
+					+ "\n\nStep 4: If you click an item, it will bring up a small screen with the full description. Click back to back out. If the item you "
+					+ "want is selected, press the buy button \n\n\n"
 					+ "`````````````````````````````````````````````````````````````````````````\n\n"
 					+ "[> When buying an Item on the View Account Screen. It saves the data. So anything you have edited can be saved this way"
 					+ " as well. Still make sure to log out by click the log out button.");
 			taBuy.setEditable(false);
 			taBuy.setWrapText(true);
+			taBuy.getStyleClass().add("plaintextfield");
 			buyTab.setContent(taBuy);
 			TextArea taDelete = new TextArea("\t\t\t How to Delete Account\n\nStep 1: Log In to Account\n\nStep 2: Click Delete Account menu"
 					+ " button, in Account menu\n\nStep 3: It will then verify you want to delete your account, You must click the YES button to"
@@ -566,6 +660,7 @@ public class Barter extends Application {
 					+ "[> If you click the cancel button. Your account will not be deleted. ");
 			taDelete.setEditable(false);
 			taDelete.setWrapText(true);
+			taDelete.getStyleClass().add("plaintextfield");
 			deleteTab.setContent(taDelete);
 			TextArea taLogOut = new TextArea("\t\t\t How to Log Out/Save Accounts\n\nStep 1: Log In to Account\n\nStep 2: Edit account"
 					+ " (Add/Remove Items, Edit Account Information, Buy Items from other Users) Step 3: You can Save and log out by clicking the"
@@ -573,10 +668,42 @@ public class Barter extends Application {
 					+ "\n\n[> When you buy items from another user the accounts get saved, still log out by clicking the Log out button in the Menu");
 			taLogOut.setEditable(false);
 			taLogOut.setWrapText(true);
+			taLogOut.getStyleClass().add("plaintextfield");
 			logOutTab.setContent(taLogOut);
 			setBottom(btBack);
 			setPadding(new Insets(10, 10, 10, 10));
 			setAlignment(btBack, Pos.CENTER);
+		}
+	}
+	class ViewItemPane extends BorderPane {
+		VBox vb = new VBox(15);
+		TextField tfName = new TextField();
+		TextField tfPrice = new TextField();
+		TextArea taDescription = new TextArea();
+		Button btBack = new Button("Back");
+		
+		public ViewItemPane() {
+			getStyleClass().add("mainpane");
+			tfName.getStyleClass().add("plaintextfield");
+			tfPrice.getStyleClass().add("plaintextfield");
+			taDescription.getStyleClass().add("plaintextfield");
+			setPadding(new Insets(10));
+			vb.getChildren().addAll(tfName, tfPrice, taDescription, btBack);
+			vb.setAlignment(Pos.CENTER);
+			setCenter(vb);
+			taDescription.setWrapText(true);
+			taDescription.setPrefColumnCount(10);
+			taDescription.setEditable(false);
+			tfName.setEditable(false);
+			tfName.setPrefColumnCount(10);
+			tfPrice.setEditable(false);
+			tfPrice.setPrefColumnCount(10);
+			
+		}
+		public void setItem(Item i) {
+			tfName.setText(i.getItemName());
+			tfPrice.setText("$" + i.getItemPrice() + "0");
+			taDescription.setText(i.getDescription());
 		}
 	}
 }

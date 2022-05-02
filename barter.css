@@ -1,36 +1,53 @@
 .plainbutton {
-    -fx-border-color: mediumblue;
+    -fx-border-radius: 5px;
+    -fx-border-color: seagreen;
 }
 .plaintextfield {
+    -fx-border-radius: 5px;
+    -fx-border-color: seagreen;
+    -fx-opacity: .75;
 }
 .plainlabel {
-    -fx-border-color: black;
-    -fx-background-color: white;
-    -fx-label-padding: 2, 2, 2, 2;
+    -fx-border-radius: 5px;
+    -fx-text-fill: rgb(1, 66, 1);
     -fx-font-weight: bold;
+    -fx-padding: 3px;
 }
 .largelabel {
-    -fx-border-color: black;
-    -fx-background-color: white;
-    -fx-font-size: 18; 
     -fx-font-weight: bold;
-    -fx-label-padding: 10;
+    -fx-font-size: 22px;
+    -fx-font-color: rgb(1, 66, 1);
+    -fx-border-color: rgb(1, 66, 1);
+    -fx-border-radius: 5px;
+    -fx-padding: 6px;
+    -fx-border-width: 3px;
 }
 .mainpane {
-    -fx-padding: 15, 15, 15, 15;
     -fx-border-color: black;
-    -fx-border-width: 10;
+    -fx-padding: 5px 10px 5px;
+    -fx-background-image: url("barterLogo.png");
+    -fx-background-repeat: no-repeat;
+    -fx-background-size: cover;
 }
 .minorpane {
-    -fx-padding: 15, 15, 15, 15;
-    -fx-background-insets: 10;
-    -fx-border-width: 10;
+    -fx-border-radius: 5px;    
+    -fx-padding: 10px;
 }
-.minipane {
-    -fx-border-width: 2;
-    -fx-padding: 10;
-}
-.viewpane {
+.infopane {
     -fx-border-color: black;
-    -fx-padding: 20, 0, 0, 0;
+    -fx-border-radius: 5px;
+    -fx-padding: 15px;
+}
+.menubar {
+    -fx-border-color: green;
+    -fx-border-radius: 5px;
+}
+.tabpane {
+    -fx-border-color: green;
+    -fx-border-radius: 5px;
+}
+.tableview {
+    -fx-border-radius: 5px;
+    -fx-border-color: black;
+    -fx-opacity: .75;
 }

@@ -15,12 +15,12 @@ public class Account implements Serializable, Collection {
 	private List<Item> items;
 	private double balance = 0;
 	private int itemCount = 0;
-	private transient Image image;
 	
 	public Account() {
 		this.dateCreated = new Date();
 		items = new ArrayList<Item>();
 		accountID = "BID" + (int)(Math.random() * 1000);
+		location = "Unknown";
 	}
 	public Account(String name, String pass) {
 		accountName = name;
@@ -28,6 +28,7 @@ public class Account implements Serializable, Collection {
 		dateCreated = new Date();
 		accountID = "BID" + (int)(Math.random() * 1000);
 		items = new ArrayList<Item>();
+		location = "Unknown";
 	}
 	public Account(Account alt) {
 		this.accountName = alt.getAccountName();
@@ -38,7 +39,6 @@ public class Account implements Serializable, Collection {
 		this.items = alt.getItems();
 		this.balance = alt.getBalance();
 		this.itemCount = alt.getItemCount();
-		this.image = alt.getImage();
 	}
 	public String getAccountName() {
 		return accountName;
@@ -140,13 +140,6 @@ public class Account implements Serializable, Collection {
 	@Override
 	public boolean isEmpty() {
 		return items.isEmpty();
-	}
-	public Image getImage() {
-		return image;
-	}
-	public void setImage(String imagePath) {
-		Image accountImage = new Image(imagePath);
-		this.image = accountImage;
 	}
 
 	@Override
